@@ -1,0 +1,39 @@
+数据大约是这样的，是个json串，我们需要从中提取数，可以看到编码（A190101）和终止符（dotcount）在一组数据中是唯一的，所以可以用它来确定数据（50.4）的位置
+
+{"returncode":200,"returndata":{"datanodes":[
+{"code":"zb.A190101_sj.201608","data":{"data":50.4,"dotcount":1,"hasdata":true,"strdata":"50.4"},"wds":[{"valuecode":"A190101","wdcode":"zb"},{"valuecode":"201608","wdcode":"sj"}]},
+
+{"code":"zb.A190101_sj.201607","data":{"data":49.9,"dotcount":1,"hasdata":true,"strdata":"49.9"},"wds":[{"valuecode":"A190101","wdcode":"zb"},{"valuecode":"201607","wdcode":"sj"}]},
+
+//爬虫在这里开始
+library(RCurl)
+library(lubridate) 计算2013年1月到有最新数据的一个月有多少月要用的包
+myheader<-c("User-Agent"="Mozilla/5.0 (Windows NT 6.1; rv:47.0) Gecko/20100101 
+Firefox/47.0","Accept"="text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8","Accept-Language"="zh-CN,zh;q=0.8,en-US;q=0.5,en;q=0.3","Accept-Encoding"="gzip, deflate","Connection"="keep-alive")  //报头，通知统计局网站我们的情况，网络通信需要
+
+//大型拖拉机
+xpath=http://data.stats.gov.cn/easyquery.htm?m=QueryData&dbcode=hgyd&rowcode=zb&colcode=sj&wds=%5B%5D&dfwds=%5B%7B%22wdcode%22%3A%22sj%22%2C%22valuecode%22%3A%222013-%22%7D%2C%7B%22wdcode%22%3A%22zb%22%2C%22valuecode%22%3A%22A020840%22%7D%5D&k1=1472670084714 //从哪抓数据 A020840和2013-是用来区分指标页面的代码和开始年份
+url=getURL(xpath,httpheader=myheader) //真正抓数据的一行，那个网页本来就是一个json串，抓下来也是json串，别的网站可能不一样
+write(url,"C://Users/elizabeth/Documents/A020840.txt") //我用来检测的一行，可有可无
+big_tractor<-"zb.A02084001_sj." //这个编码是一整页不同数据用来区分的编码end_point<-"dotcount" //一列数据终止的标志，和上一个编码一起用来确定某种数据的一个月份的数所在位置的范围。和编码不一样，对于各种数据，结束的标志只有一种。
+
+material_start_index<-regexpr(big_tractor,url)  //找这个标志编码第一次在哪里出现，第几个字符
+end_index<-regexpr(end_point,url) //找数据段在哪里结束，他必须在上边编码后边。有一种情况不注意可能导致他在上边编码前边，就是你要找的那种数据不是抓下来的大字符串里的第一种数据。这种情况必须把前边的几种数据都删了。
+
+data_single<-substr(url,material_start_index,end_index) //从大的字符串用刚才找的起始和终止点找出一行数据
+temp<-as.numeric(substr(data_single,40,nchar(data_single)-3)) // 从那一行数据把数提取出来
+url<-substr(url,end_index+5,nchar(url)) //把刚才的一行数据从原始大字符串里删掉，以免被记录第二次
+大型拖拉机产量<-temp //把刚刚提出的数放进数据向量，如果这个数据里有小数，那么这个向量需要提前用小数初始化
+
+i<-(year(Sys.Date())-2013)*12+month(Sys.Date())-2 //使用lubridate包的函数来计算有多少个月要提取
+
+while(i>0) //循环，和上边道理差不多，就是有的需要初始化那个向量，所以上边才单分出来一步
+{
+  material_start_index<-regexpr(big_tractor,url)
+  end_index<-regexpr(end_point,url)
+  data_single<-substr(url,material_start_index,end_index) 
+  temp<-as.numeric(substr(data_single,40,nchar(data_single)-3))
+  大型拖拉机产量<-c(大型拖拉机产量,temp)
+  url<-substr(url,end_index+5,nchar(url))
+  i<-i-1
+}
