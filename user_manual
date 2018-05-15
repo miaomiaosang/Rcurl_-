@@ -7,13 +7,15 @@
 
 //爬虫在这里开始
 library(RCurl)
-library(lubridate) 计算2013年1月到有最新数据的一个月有多少月要用的包
+library(lubridate) 计算2013年1月到有最新数据的一个月总共有多少月要用的包
 myheader<-c("User-Agent"="Mozilla/5.0 (Windows NT 6.1; rv:47.0) Gecko/20100101 
-Firefox/47.0","Accept"="text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8","Accept-Language"="zh-CN,zh;q=0.8,en-US;q=0.5,en;q=0.3","Accept-Encoding"="gzip, deflate","Connection"="keep-alive")  //报头，通知统计局网站我们的情况，网络通信需要
+Firefox/47.0","Accept"="text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8","Accept-Language"="zh-CN,zh;q=0.8,en-US;q=0.5,en;q=0.3","Accept-Encoding"="gzip, deflate","Connection"="keep-alive")  
+//报头，通知统计局网站我们的情况，网络通信需要
 
 //大型拖拉机
-xpath=http://data.stats.gov.cn/easyquery.htm?m=QueryData&dbcode=hgyd&rowcode=zb&colcode=sj&wds=%5B%5D&dfwds=%5B%7B%22wdcode%22%3A%22sj%22%2C%22valuecode%22%3A%222013-%22%7D%2C%7B%22wdcode%22%3A%22zb%22%2C%22valuecode%22%3A%22A020840%22%7D%5D&k1=1472670084714 //从哪抓数据 A020840和2013-是用来区分指标页面的代码和开始年份
-url=getURL(xpath,httpheader=myheader) //真正抓数据的一行，那个网页本来就是一个json串，抓下来也是json串，别的网站可能不一样
+xpath=http://data.stats.gov.cn/easyquery.htm?m=QueryData&dbcode=hgyd&rowcode=zb&colcode=sj&wds=%5B%5D&dfwds=%5B%7B%22wdcode%22%3A%22sj%22%2C%22valuecode%22%3A%222013-%22%7D%2C%7B%22wdcode%22%3A%22zb%22%2C%22valuecode%22%3A%22A020840%22%7D%5D&k1=1472670084714 
+//从哪抓数据 A020840和2013-是用来区分指标页面的代码和开始年份 A020840在这里就是大型拖拉机的代码
+url=getURL(xpath,httpheader=myheader) //抓数据的一行，那个网页本来就是一个json串，抓下来也是json串，别的网站可能不一样爬虫
 write(url,"C://Users/elizabeth/Documents/A020840.txt") //我用来检测的一行，可有可无
 big_tractor<-"zb.A02084001_sj." //这个编码是一整页不同数据用来区分的编码end_point<-"dotcount" //一列数据终止的标志，和上一个编码一起用来确定某种数据的一个月份的数所在位置的范围。和编码不一样，对于各种数据，结束的标志只有一种。
 
